@@ -1,9 +1,14 @@
-const {app, Menu, Tray, dialog, BrowserWindow} = require('electron');
+const {app, Menu, Tray, dialog, BrowserWindow, nativeImage} = require('electron');
 const {exec, execSync} = require('child_process');
 const path = require('path');
 
 let win
 let locationEntries = [];
+
+disconnect = () => { eVpnCommand("disconnect") };
+smart = () => { eVpnCommand("connect smart") };
+let locationEntries = [];
+let currentlyActiveLocLabel = undefined;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -135,7 +140,24 @@ function getConnectionStatusOrDie() {
 
     coloredClean(stdout);
     if (coloredCleanGlobal.startsWith('Connected')) {
+      const loc = coloredCleanGlobal.replace('Connected to ', '').trim();
       trayIcon.setImage(path.join(__dirname, connectedIcon));
+
+      if (loc !== currentlyActiveLocLabel) {
+        // update indicator icon
+        locationEntries.forEach((entry) => {
+          if (entry.label === loc) {
+            entry.icon = nativeImage.createFromPath(
+              __dirname + '/assets/evpc.png'
+            ).resize({ width: 16 });
+          } else {
+            delete entry.icon;
+          }
+        });
+        updateMenu();
+        currentlyActiveLocLabel = loc;
+      }
+
       return;
     }
     if (coloredCleanGlobal.startsWith('Not connected') || coloredCleanGlobal.startsWith('Disconnected')) {
@@ -159,12 +181,7 @@ function getConnectionStatusOrDie() {
 }
 
 
-// setTrayIcon will initialize the tray icon and set a timer to update the status in case
-// the vpn connection status is changed outside this application
-function setTrayIcon() {
-
-  disconnect = () => { eVpnCommand("disconnect") };
-
+function updateMenu() {
   contextMenu = Menu.buildFromTemplate([
     {label: 'Disconnect', click: disconnect},
     {type: 'separator'},
@@ -176,9 +193,15 @@ function setTrayIcon() {
       }
     },
   ]);
-
-  setInterval(getConnectionStatusOrDie, 2000);
   trayIcon.setContextMenu(contextMenu);
+}
+
+
+// setTrayIcon will initialize the tray icon and set a timer to update the status in case
+// the vpn connection status is changed outside this application
+function setTrayIcon() {
+  setInterval(getConnectionStatusOrDie, 2000);
+  updateMenu();
 }
 
 
