@@ -167,6 +167,19 @@ function getConnectionStatusOrDie() {
     }
     if (coloredCleanGlobal.startsWith('Not connected') || coloredCleanGlobal.startsWith('Disconnected')) {
       trayIcon.setImage(path.join(__dirname, disconnectedIcon));
+
+      // remove indicator icon
+      let dirty = false;
+      locationEntries.forEach((entry) => {
+        if (entry.icon) {
+          dirty = true;
+          delete entry.icon;
+        }
+      });
+      if (dirty) {
+        updateMenu();
+      }
+
       return;
     }
     if (coloredCleanGlobal.startsWith('Connecting') || coloredCleanGlobal.startsWith('Disconnecting') || coloredCleanGlobal.startsWith('Reconnecting')) {
