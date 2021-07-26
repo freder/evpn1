@@ -121,7 +121,6 @@ function eVpnCommand(param) {
         console.log('DONE ERROR!');
         return;
       }
-
     }
 
     console.log(`stdout: ${stdout}`);
@@ -133,10 +132,8 @@ function eVpnCommand(param) {
 // getConnectionStatusOrDie does the monitoring of vpns status and enbles other function to
 // update the UI. If it cannot check the connection status it will close the app
 function getConnectionStatusOrDie() {
-
   if (abort)
     return;
-
 
   exec('expressvpn status', (err, stdout, stderr) => {
     if (err) {
@@ -214,9 +211,7 @@ function setTrayIcon() {
 
 
 function coloredClean(msg) {
-
   coloredCleanGlobal = msg.toString().split('\n')[0].replace(
     /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
-
   console.log(coloredCleanGlobal);
 }
