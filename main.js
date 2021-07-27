@@ -7,7 +7,7 @@ let win
 disconnect = () => { eVpnCommand("disconnect") };
 smart = () => { eVpnCommand("connect smart") };
 let locationEntries = [];
-let currentlyActiveLocLabel = undefined;
+let activeLocationLabel = undefined;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -148,26 +148,29 @@ function getConnectionStatusOrDie() {
       const loc = coloredCleanGlobal.replace('Connected to ', '').trim();
       trayIcon.setImage(path.join(__dirname, connectedIcon));
 
-      if (loc !== currentlyActiveLocLabel) {
+      if (loc !== activeLocationLabel) {
         // update indicator icon
         locationEntries.forEach((entry) => {
           if (entry.label === loc) {
             entry.icon = nativeImage.createFromPath(
-              __dirname + '/assets/evpc.png'
+              __dirname + '/' + regularIcon
             ).resize({ width: 16 });
           } else {
             delete entry.icon;
           }
         });
+        activeLocationLabel = loc;
         updateMenu();
-        currentlyActiveLocLabel = loc;
       }
 
       return;
     }
-    if (coloredCleanGlobal.startsWith('Not connected') || coloredCleanGlobal.startsWith('Disconnected')) {
+    else if (
+      coloredCleanGlobal.startsWith('Not connected') ||
+      coloredCleanGlobal.startsWith('Disconnected')
+    ) {
       trayIcon.setImage(path.join(__dirname, disconnectedIcon));
-      currentlyActiveLocLabel = undefined;
+      activeLocationLabel = undefined;
 
       // remove indicator icon
       let dirty = false;
@@ -183,9 +186,13 @@ function getConnectionStatusOrDie() {
 
       return;
     }
-    if (coloredCleanGlobal.startsWith('Connecting') || coloredCleanGlobal.startsWith('Disconnecting') || coloredCleanGlobal.startsWith('Reconnecting')) {
+    else if (
+      coloredCleanGlobal.startsWith('Connecting') ||
+      coloredCleanGlobal.startsWith('Disconnecting') ||
+      coloredCleanGlobal.startsWith('Reconnecting')
+    ) {
       trayIcon.setImage(path.join(__dirname, waitingIcon));
-      currentlyActiveLocLabel = undefined;
+      activeLocationLabel = undefined;
       return;
     }
 
