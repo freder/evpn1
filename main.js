@@ -167,6 +167,7 @@ function getConnectionStatusOrDie() {
     }
     if (coloredCleanGlobal.startsWith('Not connected') || coloredCleanGlobal.startsWith('Disconnected')) {
       trayIcon.setImage(path.join(__dirname, disconnectedIcon));
+      currentlyActiveLocLabel = undefined;
 
       // remove indicator icon
       let dirty = false;
@@ -184,17 +185,17 @@ function getConnectionStatusOrDie() {
     }
     if (coloredCleanGlobal.startsWith('Connecting') || coloredCleanGlobal.startsWith('Disconnecting') || coloredCleanGlobal.startsWith('Reconnecting')) {
       trayIcon.setImage(path.join(__dirname, waitingIcon));
+      currentlyActiveLocLabel = undefined;
       return;
     }
 
     let msg = stderr
-    if (msg.length <= 0){
+    if (msg.length <= 0) {
       msg = stdout
     }
     console.log("Evpn1::ERROR\n",msg);
     app.quit()
     return false;
-
   });
 }
 
